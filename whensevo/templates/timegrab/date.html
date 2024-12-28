@@ -4,7 +4,19 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 <body>
-    <p id="timeOutput">{{timeUntilEVO}}</p>
+<h1>Time Until EVO:</h1>
+<script>
+    setInterval(() => {
+        let dateString = fetch('/time/rawgrab', {
+        method: 'GET'
+        })
+        let daysLeft = dateString;
+        element = document.getElementById('timeOutp');
+        element.innerHTML = daysLeft;
+    }, 1000)
+</script>
+    <div id="timeOutp">Loading...</div>
+    <p id="timeOutput"><h3>{{timeUntilEVO}}</p></h3>
 </body>
 
 </html>

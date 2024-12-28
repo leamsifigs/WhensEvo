@@ -16,7 +16,10 @@ def grab():
     
     return render_template('timegrab/date.html' , timeUntilEVO=timeUntilEVO)
 
-@bp.route("/")
-def home():
+@bp.route('/rawgrab')
+def rawgrab():
+    currentDate = datetime.datetime.now(datetime.UTC)
+    evoDate = datetime.datetime(2025, 8, 1, 10, tzinfo = pytz.utc)
+    timeUntilEVO = evoDate - currentDate
     
-    return render_template('timegrab/home.html')
+    return str(timeUntilEVO)
