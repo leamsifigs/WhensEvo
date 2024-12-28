@@ -15,3 +15,8 @@ def grab():
     timeUntilEVO = evoDate - currentDate
     
     return render_template('timegrab/date.html' , timeUntilEVO=timeUntilEVO)
+
+@bp.route("/")
+def home():
+    
+    return render_template('timegrab/home.html')
