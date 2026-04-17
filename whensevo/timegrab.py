@@ -1,30 +1,30 @@
-import functools
-import datetime
-import pytz
+from flask import Blueprint, render_template, request, redirect, url_for
+from .db import get_db
 
-from flask import (
-    Blueprint, flash, g, redirect, render_template, url_for
-)
+bp = Blueprint("timegrab", __name__)
 
-bp = Blueprint("timegrab",  __name__, url_prefix='/time')
 
-@bp.route('/grab')
-def grab():
-    currentDate = datetime.datetime.now(datetime.UTC)
-    evoDate = datetime.datetime(2025, 8, 1, 10, tzinfo = pytz.utc)
-    timeUntilEVO = evoDate - currentDate
-    
-    return render_template('timegrab/date.html' , timeUntilEVO=timeUntilEVO)
+@bp.route('/')
+def home():
+    db = get_db()
+    events = db.execute('SELECT id, name, target_date FROM events ORDER BY target_date').fetchall()
+    return render_template('timegrab/home.html', events=events)
 
-@bp.route('/jsonGrab')
-def rawgrab():
-    currentDate = datetime.datetime.now(datetime.UTC)
-    evoDate = datetime.datetime(2025, 8, 1, 10, tzinfo = pytz.utc)
-    timeUntilEVO = evoDate - currentDate
-    
-    return timeUntilEVO
-#   todo update this so there's a jason response? Idk. seems like a dumb way to go about this 
-#   but if it works, it works i guess. There doesnt seem to be a way to deal with this outside 
-#   of using promises but i'm not sure I want to learn how to do that riught now. should the 
-#   javascript be inside the jinja or should it be inside of its own folder. does it belong in 
-#   templates? much to thinkabout
+
+@bp.route('/add', methods=['POST'])
+def add():
+    name = request.form['name'].strip()
+    target_date = request.form['target_date']
+    if name and target_date:
+        db = get_db()
+        db.execute('INSERT INTO events (name, target_date) VALUES (?, ?)', (name, target_date))
+        db.commit()
+    return redirect(url_for('timegrab.home'))
+
+
+@bp.route('/delete/<int:event_id>', methods=['POST'])
+def delete(event_id):
+    db = get_db()
+    db.execute('DELETE FROM events WHERE id = ?', (event_id,))
+    db.commit()
+    return redirect(url_for('timegrab.home'))

@@ -1,13 +1,48 @@
 <html>
     <head>
-        <title>How long til' EVO?</title>
+        <title>When's Evo?</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 <body>
     <div id="banner">
-        <p>How long until EVO?</p>
-        <p>Countdown:</p>
+        <p>Countdowns</p>
     </div>
-</body>
 
+    <div id="events">
+        {% for event in events %}
+        <div class="event-card">
+            <span class="event-name">{{ event['name'] }}</span>
+            <span class="event-countdown" data-target="{{ event['target_date'] }}">Loading...</span>
+            <form method="post" action="/delete/{{ event['id'] }}" style="display:inline;">
+                <button type="submit">x</button>
+            </form>
+        </div>
+        {% else %}
+        <p>No events yet. Add one below.</p>
+        {% endfor %}
+    </div>
+
+    <form id="add-form" method="post" action="/add">
+        <input type="text" name="name" placeholder="Event name" required>
+        <input type="datetime-local" name="target_date" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <script>
+        function update() {
+            document.querySelectorAll('[data-target]').forEach(el => {
+                const diff = new Date(el.dataset.target) - Date.now();
+                if (diff <= -259200000) { el.textContent = 'is dead and gone!'; return; }
+                if (diff <= 0) { el.textContent = 'is NOW!'; return; }
+                const days    = Math.floor(diff / 86400000);
+                const hours   = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+                const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+                el.textContent = `${days} days, ${hours}:${minutes}:${seconds}`;
+            });
+        }
+        update();
+        setInterval(update, 1000);
+    </script>
+</body>
 </html>
